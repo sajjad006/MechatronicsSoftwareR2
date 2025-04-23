@@ -72,8 +72,6 @@ class DroneSimulator:
         
         telemetry = data['telemetry']
 
-        # parse this string and update it to drone object of self class 'X-5-Y-70-BAT-97.8711990153748-GYR-[0.22222222222222224, 0.0, 0.0]-WIND-35.67899767600586-DUST-32.57303873773703-SENS-GREEN'\
-        # Example: telemetry = "X-5-Y-70-BAT-97.8711990153748-GYR-[0.22222222222222224, 0.0, 0.0]-WIND-35.67899767600586-DUST-32.57303873773703-SENS-GREEN"
         telemetry = telemetry.split('-')
         telemetry_dict = {}
         for i in range(0, len(telemetry), 2):
@@ -95,12 +93,12 @@ class DroneSimulator:
         self.drone.gyro_z = telemetry_dict.get("GYR", [0, 0, 0])[2]
 
         # Boundary checks
-        self.drone.x = max(0, min(self.drone.x, self.WIDTH))
-        self.drone.altitude = max(50, min(self.drone.altitude, self.HEIGHT - 50))
-        self.drone.angle += self.drone.gyro_z * 0.1
-        self.drone.gyro_z *= 0.9
-        self.drone.gyro_x *= 0.9
-        self.drone.gyro_y *= 0.9
+        # self.drone.x = max(0, min(self.drone.x, self.WIDTH))
+        # self.drone.altitude = max(50, min(self.drone.altitude, self.HEIGHT - 50))
+        # self.drone.angle += self.drone.gyro_z * 0.1
+        # self.drone.gyro_z *= 0.9
+        # self.drone.gyro_x *= 0.9
+        # self.drone.gyro_y *= 0.9
 
         # Draw skybox gradient (sky -> horizon -> ground)
         for y in range(self.HEIGHT):
@@ -127,7 +125,8 @@ class DroneSimulator:
         pygame.draw.rect(self.screen, self.BLUE, hud_rect, 2)
 
         # Battery simulation and visual bar
-        battery_level = max(0, 100 - pygame.time.get_ticks() / 1000)
+        # battery_level = max(0, 100 - pygame.time.get_ticks() / 1000)
+        battery_level = telemetry_dict.get("BAT", 100)
         pygame.draw.rect(self.screen, self.GRAY, (20, 190, 200, 20))  # background
         pygame.draw.rect(self.screen, self.RED, (20, 190, 2 * battery_level, 20))  # level
         battery_text = self.font.render(f"Battery: {battery_level:.1f}%", True, self.WHITE)
@@ -136,7 +135,7 @@ class DroneSimulator:
         # Telemetry text
         params = [
             f"X: {self.drone.x:.1f}",
-            f"Altitude: {self.HEIGHT - self.drone.altitude:.1f}",
+            f"Altitude: {self.drone.altitude:.1f}",
             f"Speed: {self.drone.speed:.1f}",
             f"Gyro X (Roll): {self.drone.gyro_x:.1f}",
             f"Gyro Y (Pitch): {self.drone.gyro_y:.1f}",

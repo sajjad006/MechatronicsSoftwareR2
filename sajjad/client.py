@@ -8,13 +8,14 @@ import time
 from typing import Dict, Any, Optional
 from drone_simulator.logging_config import get_logger
 from simulator import DroneSimulator
+import argparse
 
 logger = get_logger("client")
 
 class DroneClient:
     """WebSocket client for testing the drone simulator."""
     
-    def __init__(self, uri: str = "ws://localhost:8765"):
+    def __init__(self, uri: str = "ws://localhost:8765", simulator=None) -> None:
         """Initialize the client."""
         self.uri = uri
         self.connection_id = None
@@ -22,6 +23,7 @@ class DroneClient:
         self.metrics = None
         self.start_time = time.time()
         self.command_count = 0
+        self.simulator = simulator if simulator else None
         logger.info(f"Drone client initialized with server URI: {uri}")
     
     async def connect(self) -> None:
@@ -50,13 +52,8 @@ class DroneClient:
                 print(f"Server says: {data['message']}")
                 
                 # Interactive control of the drone
-                await self.interactive_control(websocket)
-                # simulator = DroneSimulator()
-                # await asyncio.gather(
-                #     simulator.run(),                         # continuously updates display
-                #     self.interactive_control(websocket, simulator)  # fetches and sends commands
-                # )
-                # await self.interactive_control(websocket, simulator)
+                # await self.interactive_control(websocket)
+                await self.interactive_simulation_control(websocket)
 
                 
         except websockets.exceptions.ConnectionClosedError as e:
@@ -143,7 +140,7 @@ class DroneClient:
             logger.error(f"Error sending command: {e}", exc_info=True)
             return None
 
-    async def interactive_simulation_control(self, websocket, simulator) -> None:
+    async def interactive_simulation_control(self, websocket) -> None:
         """Interactively control the drone through the console."""
         logger.info("Starting custom control")
 
@@ -163,7 +160,7 @@ class DroneClient:
                 # altitude = max(current_altitude+1, 50)
 
                 if iteration==0:
-                    altitude = 50
+                    altitude = 70
                 else:
                     altitude = (-1)**(iteration+1)
 
@@ -174,15 +171,16 @@ class DroneClient:
                
                 try:
                     speed = 1
-                    # altitude = 50
                     movement = 'fwd'
                     
                     # Send command
                     data = await self.send_command(websocket, speed, altitude, movement)
                     if data:
-                        print(data, type(data))
                         self.update_state(data)
-                        simulator.update(data)
+
+                        if self.simulator:
+                            self.simulator.update(data)
+
                         self.display_status()
                     elif data is None:  # Crash occurred
                         break
@@ -293,19 +291,48 @@ class DroneClient:
         #            f"Iterations: {self.metrics['iterations']}, "
         #            f"Distance: {self.metrics['total_distance']}")
 
+# def main() -> None:
+#     """Start the drone client."""
+#     parser = argparse.ArgumentParser(description="Drone Client")
+#     parser.add_argument('--uri', type=str, default="ws://localhost:8765", help="WebSocket server URI")
+#     parser.add_argument('--simulator', action='store_true', help="Run the simulator")
+#     args = parser.parse_args()
+
+#     simulator = None
+#     if args.simulator:
+#         simulator = DroneSimulator()
+#         asyncio.create_task(simulator.run())  # Run simulator asynchronously
+#         print("Simulator started")
+
+#     logger.info(f"Starting Drone Client with server URI: {args.uri}")
+    
+#     client = DroneClient(args.uri, simulator=simulator)
+#     try:
+#         asyncio.run(client.connect())
+#     except KeyboardInterrupt:
+#         logger.info("Client stopped by user")
+#         print("\nClient stopped by user")
+
 def main() -> None:
-    """Start the drone client."""
-    # Parse command line arguments
-    if len(sys.argv) > 1:
-        uri = sys.argv[1]
-    else:
-        uri = "ws://localhost:8765"
-    
-    logger.info(f"Starting Drone Client with server URI: {uri}")
-    
-    client = DroneClient(uri)
+    parser = argparse.ArgumentParser(description="Drone Client")
+    parser.add_argument('--uri', type=str, default="ws://localhost:8765", help="WebSocket server URI")
+    parser.add_argument('--simulator', action='store_true', help="Run the simulator")
+    args = parser.parse_args()
+
+    async def main_async():
+        simulator = None
+        if args.simulator:
+            simulator = DroneSimulator()
+            # Start simulator as a background task
+            asyncio.create_task(simulator.run())
+            print("Simulator started")
+
+        logger.info(f"Starting Drone Client with server URI: {args.uri}")
+        client = DroneClient(args.uri, simulator=simulator)
+        await client.connect()
+
     try:
-        asyncio.run(client.connect())
+        asyncio.run(main_async())
     except KeyboardInterrupt:
         logger.info("Client stopped by user")
         print("\nClient stopped by user")
