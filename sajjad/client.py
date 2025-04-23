@@ -291,28 +291,6 @@ class DroneClient:
         #            f"Iterations: {self.metrics['iterations']}, "
         #            f"Distance: {self.metrics['total_distance']}")
 
-# def main() -> None:
-#     """Start the drone client."""
-#     parser = argparse.ArgumentParser(description="Drone Client")
-#     parser.add_argument('--uri', type=str, default="ws://localhost:8765", help="WebSocket server URI")
-#     parser.add_argument('--simulator', action='store_true', help="Run the simulator")
-#     args = parser.parse_args()
-
-#     simulator = None
-#     if args.simulator:
-#         simulator = DroneSimulator()
-#         asyncio.create_task(simulator.run())  # Run simulator asynchronously
-#         print("Simulator started")
-
-#     logger.info(f"Starting Drone Client with server URI: {args.uri}")
-    
-#     client = DroneClient(args.uri, simulator=simulator)
-#     try:
-#         asyncio.run(client.connect())
-#     except KeyboardInterrupt:
-#         logger.info("Client stopped by user")
-#         print("\nClient stopped by user")
-
 def main() -> None:
     parser = argparse.ArgumentParser(description="Drone Client")
     parser.add_argument('--uri', type=str, default="ws://localhost:8765", help="WebSocket server URI")
