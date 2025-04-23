@@ -1,3 +1,5 @@
+Refer [/sajjad006/README.md](https://github.com/sajjad006/MechatronicsSoftwareR2/sajjad006/README.md) for changes made by me.
+
 # Drone Simulator
 
 A WebSocket-based drone simulator that provides real-time telemetry data and simulates environmental conditions affecting drone flight.
