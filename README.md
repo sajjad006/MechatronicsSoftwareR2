@@ -1,4 +1,4 @@
-Refer [/sajjad006/README.md](https://github.com/sajjad006/MechatronicsSoftwareR2/sajjad006/README.md) for changes made by me.
+Refer [/sajjad/README.md]([https://github.com/sajjad006/MechatronicsSoftwareR2/sajjad006/README.md](https://github.com/sajjad006/MechatronicsSoftwareR2/blob/main/sajjad/README.md) for changes made by me.
 
 # Drone Simulator
 
